@@ -11,14 +11,10 @@ app.get('/apps', (req, res) => {
   const { sort } = req.query;
   
   const search = req.query.genres;
+
+  let results = [...store];
   
   const validGenres = ['action', 'puzzle', 'strategy', 'casual', 'arcade', 'card'];
-
-  if (!search) {
-    res
-      .status(200)
-      .json(store);
-  }
 
   if (validGenres.indexOf(search) === -1) {
     res
@@ -26,15 +22,23 @@ app.get('/apps', (req, res) => {
       .json({ error: 'Bad request: not a possible genre' });
   }
 
-  let results = store.filter((item) => 
-    item.Genres.toLowerCase().includes(search)
-  );
+  if (!sort) {
+    res
+      .status(400)
+      .json({error: 'Please sort by rating or app'})
+  }
+
+  if (search) {
+    results = store.filter((item) =>
+      item.Genres.toLowerCase().includes(search)
+    );
+  }
 
   if (sort) {
     results.sort((a, b) => {
-      return a[sort] > b[sort] ? 1 : a[sort] < b[sort] ? -1 : 0;
+      return a[sort] < b[sort] ? 1 : a[sort] > b[sort] ? -1 : 0;
     });
-  }
+  } 
 
   res
     .status(200)
